@@ -66,16 +66,17 @@ import { Logo } from '../shared/logo';
     @keyframes turn { from { opacity: 0; translate: 0 70%; } }
     .actions { justify-self: end; display: flex; align-items: center; gap: 26px; }
     .index-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 18px; border: 1px solid var(--line-2); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; transition: background-color 250ms ease, color 250ms ease, transform 160ms var(--ease-out); }
-    .index-btn:hover { background: var(--ink); color: var(--paper); }
+    @media (hover: hover) and (pointer: fine) { .index-btn:hover { background: var(--ink); color: var(--paper); } }
     .index-btn:active { transform: scale(0.97); }
     .lines { display: grid; gap: 3px; width: 14px; }
     .lines i { height: 1px; background: currentColor; }
     .lines i:nth-child(2) { width: 70%; }
 
-    .index { position: fixed; inset: 0; z-index: 110; display: flex; flex-direction: column; padding: 0 var(--gutter) 40px; background: var(--paper); visibility: hidden; clip-path: inset(0 0 100% 0); transition: clip-path 600ms var(--ease-in-out), visibility 0s 600ms; outline: none; overflow-y: auto; }
+    .index { position: fixed; inset: 0; z-index: 110; display: flex; flex-direction: column; padding: 0 var(--gutter) 40px; background: var(--paper); visibility: hidden; clip-path: inset(0 0 100% 0); transition: clip-path 380ms var(--ease-in-out), visibility 0s 380ms; outline: none; overflow-y: auto; }
     .index.open { visibility: visible; clip-path: inset(0 0 0 0); transition: clip-path 600ms var(--ease-in-out); }
     .index-top { display: flex; justify-content: space-between; align-items: center; height: 76px; flex: none; }
-    .close { display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; padding: 10px 0; }
+    .close { display: inline-flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; padding: 10px 0; transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+    .close:active { scale: 0.92; }
     .index-body { flex: 1; display: grid; grid-template-columns: 1.3fr 0.7fr; gap: clamp(30px, 6vw, 100px); align-items: center; padding-top: 20px; }
     .toc { list-style: none; margin: 0; padding: 0; counter-reset: none; }
     .toc li { opacity: 0; translate: 0 16px; transition: opacity 400ms ease, translate 500ms var(--ease-out); }

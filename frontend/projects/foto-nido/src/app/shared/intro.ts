@@ -32,7 +32,8 @@ import { Motion, prefersReducedMotion, useGsap } from '../core/motion';
     .status { position: absolute; left: 0; right: 0; bottom: clamp(30px, 6vh, 60px); text-align: center; font-family: var(--font-display); font-style: italic; font-size: 1.4rem; }
     .time { margin-left: 12px; font-family: var(--font-body); font-style: normal; font-size: 0.8rem; letter-spacing: 0.16em; font-variant-numeric: tabular-nums; }
     .mark { position: absolute; left: var(--gutter); top: 30px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; }
-    .skip { position: absolute; right: var(--gutter); top: 24px; padding: 6px 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: inherit; opacity: 0.8; }
+    .skip { position: absolute; right: var(--gutter); top: 24px; padding: 6px 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: inherit; opacity: 0.8; transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+    .skip:active { scale: 0.95; }
   `,
 })
 export class Intro {

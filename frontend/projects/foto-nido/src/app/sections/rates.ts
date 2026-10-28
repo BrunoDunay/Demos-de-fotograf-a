@@ -56,7 +56,8 @@ import { Running } from '../shared/running';
     .lead { margin-top: 18px; max-width: 48ch; color: var(--ink-2); font-size: 1.08rem; }
     .list { list-style: none; margin: 50px 0 0; padding: 0; border-top: 1px solid var(--ink); }
     .list > li { border-bottom: 1px solid var(--line-2); }
-    .row { display: grid; grid-template-columns: minmax(150px, 0.8fr) 1.4fr auto auto 30px; align-items: baseline; gap: 18px; width: 100%; padding: 26px 0; text-align: left; }
+    .row { display: grid; grid-template-columns: minmax(150px, 0.8fr) 1.4fr auto auto 30px; align-items: baseline; gap: 18px; width: 100%; padding: 26px 0; text-align: left; transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+    .row:active { scale: 0.99; }
     .name { font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1; }
     .featured .name { font-style: italic; }
     .featured .name::after { content: ''; display: block; height: 2px; margin-top: 6px; width: 60%; background: repeating-linear-gradient(90deg, var(--hilo) 0 7px, transparent 7px 11px); }

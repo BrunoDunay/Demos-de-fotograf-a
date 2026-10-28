@@ -4,6 +4,7 @@ import { Motion, hasFinePointer } from '../core/motion';
 import { Icon } from '../shared/icon';
 import { Reveal } from '../shared/reveal';
 import { Running } from '../shared/running';
+import { SwipeDismiss } from '../shared/swipe-dismiss';
 
 /**
  * Portafolio como hoja de contactos: tiras de película con número de cuadro. Las que Inés
@@ -13,7 +14,7 @@ import { Running } from '../shared/running';
 @Component({
   selector: 'app-contact-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, Reveal, Running],
+  imports: [Icon, Reveal, Running, SwipeDismiss],
   template: `
     <section class="section sheet" id="contactos" running="Hoja de contactos">
       <div class="page">
@@ -43,7 +44,7 @@ import { Running } from '../shared/running';
       </div>
 
       @if (current(); as f) {
-        <div class="loupe" role="dialog" aria-modal="true" [attr.aria-label]="f.alt" (pointerdown)="swipeStart($event)" (pointerup)="swipeEnd($event)">
+        <div class="loupe" [class.closing]="closing()" swipeDismiss="y" swipeMedia="(pointer: coarse)" (dismiss)="close(true)" role="dialog" aria-modal="true" [attr.aria-label]="f.alt" (pointerdown)="swipeStart($event)" (pointerup)="swipeEnd($event)">
           <div class="loupe-top">
             <span class="ln">Cuadro {{ number(f.img) }} · {{ f.roll }}</span>
             <button type="button" class="x" (click)="close()"><app-icon name="close" [size]="20" [stroke]="1.5" /> Cerrar</button>
@@ -76,7 +77,7 @@ import { Running } from '../shared/running';
     .rolls { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 26px; }
     .rolls button { min-height: 40px; padding: 0 16px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: oklch(70% 0.02 60); box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 14%); transition: background-color 200ms ease, color 200ms ease; }
     .rolls button.on { background: oklch(92% 0.01 75); color: var(--film); box-shadow: none; }
-    .rolls button:not(.on):hover { color: oklch(95% 0.01 75); }
+    @media (hover: hover) and (pointer: fine) { .rolls button:not(.on):hover { color: oklch(95% 0.01 75); } }
 
     /* Tira de película: perforaciones arriba y abajo de cada cuadro */
     .film { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
@@ -85,7 +86,8 @@ import { Running } from '../shared/running';
     .cell::before, .cell::after { content: ''; position: absolute; left: 0; right: 0; height: 9px; background: repeating-linear-gradient(90deg, transparent 0 7px, oklch(30% 0.01 50) 7px 17px, transparent 17px 24px); }
     .cell::before { top: 6px; }
     .cell::after { bottom: 6px; }
-    .frame { position: relative; display: block; width: 100%; aspect-ratio: 3 / 2; }
+    .frame { position: relative; display: block; width: 100%; aspect-ratio: 3 / 2; transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+    .frame:active { scale: 0.985; }
     .frame img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.9); transition: filter 300ms ease; }
     .pencil { position: absolute; inset: -12% -8%; width: 116%; height: 124%; overflow: visible; pointer-events: none; }
     .pencil path { fill: none; stroke: var(--hilo); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset 500ms var(--ease-out), opacity 120ms ease; }
@@ -99,17 +101,21 @@ import { Running } from '../shared/running';
     .edge { margin-top: 14px; overflow: hidden; white-space: nowrap; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.3em; color: color-mix(in oklch, var(--film-text) 60%, transparent); }
 
     .loupe { position: fixed; inset: 0; z-index: 150; display: grid; grid-template-rows: auto 1fr auto; padding: 18px var(--gutter) 22px; background: oklch(12% 0.01 40 / 97%); animation: fade 300ms ease; touch-action: pan-y; }
+    @media (pointer: coarse) { .loupe { touch-action: none; } }
+    .loupe.closing { animation: fade-out 200ms ease forwards; pointer-events: none; }
+    @keyframes fade-out { to { opacity: 0; } }
     @keyframes fade { from { opacity: 0; } }
     .loupe-top, .loupe-bottom { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
     .ln { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--film-text); }
-    .x { display: inline-flex; align-items: center; gap: 8px; padding: 10px 0; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(90% 0.01 75); }
+    .x { display: inline-flex; align-items: center; gap: 8px; padding: 10px 0; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: oklch(90% 0.01 75); transition: scale 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+    .x:active { scale: 0.92; }
     .stage { position: relative; display: grid; place-items: center; min-height: 0; padding: 18px 0; overflow: hidden; }
     .stage img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; animation: develop 600ms var(--ease-out); }
     @keyframes develop { from { opacity: 0; filter: blur(6px); } }
     .lens { position: absolute; width: 180px; height: 180px; margin: -90px 0 0 -90px; border-radius: 50%; background-repeat: no-repeat; box-shadow: 0 0 0 2px var(--hilo), 0 20px 40px -10px oklch(0% 0 0 / 60%); pointer-events: none; opacity: 0; scale: 0.9; transition: opacity 200ms ease, scale 250ms var(--ease-out); }
     .lens.on { opacity: 1; scale: 1; }
     .loupe-bottom button { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; color: oklch(90% 0.01 75); box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 20%); transition: background-color 200ms ease, transform 160ms var(--ease-out); }
-    .loupe-bottom button:hover { background: oklch(100% 0 0 / 10%); }
+    @media (hover: hover) and (pointer: fine) { .loupe-bottom button:hover { background: oklch(100% 0 0 / 10%); } }
     .loupe-bottom button:active { transform: scale(0.95); }
     .loupe-bottom .caption { color: oklch(80% 0.015 70); text-align: center; }
 
@@ -155,11 +161,21 @@ export class ContactSheet {
     document.body.classList.add('no-scroll');
   }
 
-  protected close() {
-    this.openImg.set(null);
-    this.lensOn.set(false);
-    this.motion.resume();
-    document.body.classList.remove('no-scroll');
+  protected readonly closing = signal(false);
+
+  /** Cierra con un desvanecido corto. "now" = ya salió arrastrándola hacia abajo. */
+  protected close(now = false) {
+    if (!this.openImg() || (this.closing() && !now)) return;
+    const done = () => {
+      this.closing.set(false);
+      this.openImg.set(null);
+      this.lensOn.set(false);
+      this.motion.resume();
+      document.body.classList.remove('no-scroll');
+    };
+    if (now || document.documentElement.classList.contains('reduce-motion')) return done();
+    this.closing.set(true);
+    setTimeout(done, 200);
   }
 
   protected step(dir: number) {
