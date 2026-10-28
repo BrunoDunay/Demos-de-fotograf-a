@@ -26,8 +26,8 @@ import { Motion, prefersReducedMotion, useGsap } from '../core/motion';
     .intro { position: fixed; inset: 0; z-index: 200; background: oklch(20% 0.05 28); color: oklch(72% 0.12 32); animation: fallback-out 600ms ease 5s forwards; }
     .intro.is-running { animation: none; }
     @keyframes fallback-out { to { opacity: 0; visibility: hidden; } }
-    /* Mismo recorte que la copia de la portada: imagen a pantalla completa recortada al centro */
-    .print { position: absolute; inset: 0; clip-path: inset(calc(50% - var(--print-h) / 2) calc(50% - var(--print-w) / 2)); }
+    /* Misma caja que la primera página del álbum en la portada */
+    .print { position: absolute; left: 50%; top: 50%; width: var(--print-w); height: var(--print-h); translate: -50% -50%; overflow: hidden; }
     .print img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; filter: invert(1) grayscale(1) contrast(0.8) blur(8px); opacity: 0.2; }
     .status { position: absolute; left: 0; right: 0; bottom: clamp(30px, 6vh, 60px); text-align: center; font-family: var(--font-display); font-style: italic; font-size: 1.4rem; }
     .time { margin-left: 12px; font-family: var(--font-body); font-style: normal; font-size: 0.8rem; letter-spacing: 0.16em; font-variant-numeric: tabular-nums; }
