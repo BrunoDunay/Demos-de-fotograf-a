@@ -1,35 +1,30 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
-import { CHAPTERS } from '../core/content';
-import { ChapterView } from '../sections/chapter';
-import { ContactSheet } from '../sections/contact-sheet';
+import { Contact } from '../sections/contact';
 import { Day } from '../sections/day';
+import { Due } from '../sections/due';
 import { Hero } from '../sections/hero';
-import { Interview } from '../sections/interview';
+import { Ines } from '../sections/ines';
 import { Letters } from '../sections/letters';
 import { Rates } from '../sections/rates';
-import { Reserve } from '../sections/reserve';
+import { Sessions } from '../sections/sessions';
 
 @Component({
   selector: 'app-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Hero, ChapterView, ContactSheet, Interview, Day, Rates, Letters, Reserve],
+  imports: [Hero, Sessions, Due, Day, Ines, Rates, Letters, Contact],
   template: `
     <app-hero />
-    @for (c of chapters; track c.id; let i = $index) {
-      <app-chapter [chapter]="c" [variant]="i + 1" />
-    }
-    <app-contact-sheet />
-    <app-interview />
+    <app-sessions />
+    <app-due />
     <app-day />
+    <app-ines />
     <app-rates />
     <app-letters />
-    <app-reserve />
+    <app-contact />
   `,
 })
 export default class Home {
-  protected readonly chapters = CHAPTERS;
-
   constructor() {
     inject(Title).setTitle('Nido · Fotografía newborn y familia en Aguascalientes');
     inject(Meta).updateTag({

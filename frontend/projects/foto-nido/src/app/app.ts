@@ -1,25 +1,21 @@
 import { ChangeDetectionStrategy, Component, afterNextRender, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Motion } from './core/motion';
-import { Colophon } from './sections/colophon';
-import { Masthead } from './sections/masthead';
-import { Intro } from './shared/intro';
-import { Cursor } from './shared/pointer';
+import { Bar } from './sections/bar';
+import { Footer } from './sections/footer';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, Masthead, Colophon, Intro, Cursor],
+  imports: [RouterOutlet, Bar, Footer],
   template: `
-    <app-intro />
     <a class="skip" href="#contenido">Saltar al contenido</a>
-    <app-masthead />
+    <app-bar />
     <main id="contenido"><router-outlet /></main>
-    <app-colophon />
-    <app-cursor />
+    <app-footer />
   `,
   styles: `
-    .skip { position: fixed; left: 16px; top: -60px; z-index: 100; padding: 12px 18px; background: var(--ink); color: var(--paper); transition: top 200ms ease; }
+    .skip { position: fixed; left: 16px; top: -80px; z-index: 100; padding: 12px 18px; background: var(--ink); color: var(--bg); font-weight: 600; transition: top 200ms ease; }
     .skip:focus { top: 16px; }
   `,
 })

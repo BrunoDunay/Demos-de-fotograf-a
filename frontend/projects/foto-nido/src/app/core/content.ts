@@ -9,26 +9,11 @@ export const CONTACT = {
   hours: 'Sesiones de martes a sábado, con cita',
 };
 
-/** Índice del álbum: cada entrada es una sección con su "página". */
-export const INDEX = [
-  { id: 'cap-1', num: 'I', title: 'Los primeros días', page: '04', img: 'nb-mama' },
-  { id: 'cap-2', num: 'II', title: 'La espera', page: '12', img: 'mt-trigo' },
-  { id: 'cap-3', num: 'III', title: 'Los de casa', page: '20', img: 'fm-campo' },
-  { id: 'cap-4', num: 'IV', title: 'El primer pastel', page: '28', img: 'pa-pastel' },
-  { id: 'contactos', num: '', title: 'Hoja de contactos', page: '36', img: 'nb-bn' },
-  { id: 'ines', num: '', title: 'Inés, en sus palabras', page: '40', img: 'ines' },
-  { id: 'dia', num: '', title: 'Un día de sesión', page: '44', img: 'nb-luz' },
-  { id: 'tarifas', num: '', title: 'Tarifas', page: '48', img: 'nb-abrazo' },
-  { id: 'cartas', num: '', title: 'Cartas', page: '52', img: 'mt-dos' },
-  { id: 'reserva', num: '', title: 'Reserva', page: '60', img: 'mt-encaje' },
-];
-
 export interface Chapter {
   id: string;
   num: string;
   session: string;
   title: string;
-  page: string;
   spec: string[];
   text: string[];
   quote?: string;
@@ -41,7 +26,6 @@ export const CHAPTERS: Chapter[] = [
     num: 'I',
     session: 'Newborn',
     title: 'Los primeros días',
-    page: '04',
     spec: ['De 5 a 15 días de nacido', '3 a 4 horas', 'En estudio, a 27 °C'],
     text: [
       'A los diez días todavía se acurrucan como en la panza. Es la única ventana para las fotos en las que caben en tus manos, y se cierra rápido.',
@@ -59,7 +43,6 @@ export const CHAPTERS: Chapter[] = [
     num: 'II',
     session: 'Maternidad',
     title: 'La espera',
-    page: '12',
     spec: ['Entre la semana 28 y la 34', 'Hora y media', 'Estudio o campo'],
     text: [
       'Casi todas las mamás me dicen que no se sienten bonitas en esta etapa. Luego ven las fotos.',
@@ -77,7 +60,6 @@ export const CHAPTERS: Chapter[] = [
     num: 'III',
     session: 'Familia',
     title: 'Los de casa',
-    page: '20',
     spec: ['Todas las edades', 'Una hora', 'Al atardecer o en su casa'],
     text: [
       'No les voy a pedir que miren a la cámara y sonrían. Jueguen, abrácense, peléense un poco. Yo me quedo cerca y espero.',
@@ -94,7 +76,6 @@ export const CHAPTERS: Chapter[] = [
     num: 'IV',
     session: 'Primer año',
     title: 'El primer pastel',
-    page: '28',
     spec: ['De 10 a 12 meses', 'Hora y media', 'Decoración incluida'],
     text: [
       'Cumplir un año es un desastre precioso: betún en el pelo, globos que se escapan y un pastel que dura cuatro minutos.',
@@ -160,7 +141,7 @@ export const DAY = [
 
 export const RATES = [
   { name: 'Esencial', price: 3900, line: 'Una sesión, 15 fotos editadas', details: ['Sesión de 1.5 a 3 horas', 'Galería en línea', '1 set y 2 cambios de ropa'], featured: false },
-  { name: 'Nido', price: 6500, line: 'Sin límite de tiempo, 35 fotos y álbum', details: ['Fotos con papás y hermanos', '4 sets y vestuario del estudio', 'Álbum de 20 × 20 cm', 'Es la que más eligen'], featured: true },
+  { name: 'Nido', price: 6500, line: 'Sin límite de tiempo, 35 fotos y álbum', details: ['Fotos con papás y hermanos', '4 sets y vestuario del estudio', 'Álbum de 20 × 20 cm', 'Vestuario para toda la familia'], featured: true },
   { name: 'Historia completa', price: 11800, line: 'Maternidad, newborn y primer año', details: ['Tres sesiones a lo largo del año', '80 fotos editadas', 'Álbum de lino de 30 × 30 cm', 'Prioridad para elegir fechas'], featured: false },
 ];
 
@@ -185,3 +166,29 @@ export const NOTES = [
 ];
 
 export const SESSION_TYPES = ['newborn', 'maternidad', 'familia', 'primer año'];
+
+/** Portada: el título se queda fijo y abajo el bebé crece, de la semana 31 al primer cumpleaños. */
+export const GROWING = [
+  { img: 'mt-atardecer', age: 'Semana 31', who: 'Andrea, esperando a Tomás', alt: 'Manos de una pareja sobre la panza de embarazo al atardecer' },
+  { img: 'nb-manta', age: 'Día 9', who: 'Tomás, envuelto en lana', alt: 'Recién nacido dormido, envuelto en una manta de lana café' },
+  { img: 'nb-ventana', age: 'Día 12', who: 'Con mamá, junto a la ventana', alt: 'Mamá mirando a su bebé recién nacido junto a la ventana' },
+  { img: 'fm-casa', age: 'Mes 7', who: 'En casa, con los dos', alt: 'Papá y mamá cargando a su bebé de siete meses en casa' },
+  { img: 'pa-canasta', age: 'Mes 11', who: 'Ya se sienta solo', alt: 'Bebé sonriendo con un sombrero amarillo dentro de una canasta' },
+  { img: 'pa-globo', age: 'Un año', who: 'El primer pastel', alt: 'Bebé de un año sentada junto a un globo blanco y su pastel' },
+];
+
+/** Las cuatro sesiones como láminas a pantalla completa (la foto, de cerca). */
+export const SESSIONS = [
+  { id: 'newborn', name: 'Recién nacidos', when: 'De 5 a 15 días', fact: '3 a 4 horas, en estudio', img: 'nb-rostro', alt: 'Recién nacido dormido sobre una manta tejida', chapter: 'cap-1' },
+  { id: 'maternidad', name: 'Maternidad', when: 'Semanas 28 a 34', fact: 'Hora y media, estudio o campo', img: 'mt-trigo', alt: 'Pareja esperando bebé en un campo de trigo al atardecer', chapter: 'cap-2' },
+  { id: 'familia', name: 'Familia', when: 'Todas las edades', fact: 'Una hora, al atardecer', img: 'fm-campo', alt: 'Familia con tres hijos sentada en el pasto al atardecer', chapter: 'cap-3' },
+  { id: 'primer año', name: 'Primer año', when: 'De 10 a 12 meses', fact: 'Decoración incluida', img: 'pa-pastel', alt: 'Bebé comiendo su pastel de cumpleaños con las manos', chapter: 'cap-4' },
+];
+
+/** Un día de sesión newborn: un verbo por etapa. */
+export const VERBS = [
+  { verb: 'Llegar', time: '9:30', text: 'El estudio ya está a 27 grados, con ruido blanco, café y un sillón para ti.', img: 'nb-luz', alt: 'Luz de la mañana sobre la manta donde duerme un bebé' },
+  { verb: 'Dormir', time: '10:15', text: 'Si tiene hambre, come. La sesión empieza cuando se duerme, no cuando lo dice el reloj.', img: 'nb-canasta', alt: 'Bebé dormida dentro de una canasta tejida' },
+  { verb: 'Abrazar', time: '12:30', text: 'Fotos con mamá, papá y hermanos, con la ropa de la guía que te mando antes.', img: 'nb-abrazo', alt: 'Mamá abrazando a su recién nacido' },
+  { verb: 'Elegir', time: '+15 días', text: 'Diez fotos para presumir en cinco días y la galería completa, editada a mano, en quince.', img: 'nb-cama', alt: 'Mamá recostada junto a su bebé dormido' },
+];

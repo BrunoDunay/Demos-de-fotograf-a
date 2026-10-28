@@ -1,61 +1,49 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { LETTERS } from '../core/content';
 import { Reveal } from '../shared/reveal';
-import { Running } from '../shared/running';
 
-/** Lo que escriben las familias, una carta a la vez, con su foto como estampa. */
+/** Cartas de familias: cada una con la foto de su sesión, alternando de lado. */
 @Component({
   selector: 'app-letters',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Reveal, Running],
+  imports: [Reveal],
   template: `
-    <section class="section letters" id="cartas" running="Cartas">
-      <div class="page">
-        <p class="folio" data-reveal><span><b>Cartas</b> · lo que escriben después</span><span>p. 52</span></p>
-        <div class="layout" data-reveal [revealDelay]="80">
-          @for (l of [letters[i()]]; track l.name) {
-            <figure class="stamp">
-              <img [src]="'media/' + l.img + '-sm.webp'" [alt]="'Foto de la sesión de ' + l.name" width="720" height="900" />
-            </figure>
-            <blockquote class="letter">
-              <p>{{ l.text }}</p>
-              <footer><span class="who">{{ l.name }}</span><span class="what">{{ l.session }}</span></footer>
-            </blockquote>
-          }
-        </div>
-        <div class="nav">
-          <button type="button" class="thread" (click)="go(-1)"><span class="arrow">←</span> Anterior</button>
-          <span class="count" aria-live="polite">Carta {{ i() + 1 }} de {{ letters.length }}</span>
-          <button type="button" class="thread" (click)="go(1)">Siguiente <span class="arrow">→</span></button>
-        </div>
-      </div>
+    <section id="cartas" class="letters wrap" aria-labelledby="cartas-t">
+      <h2 id="cartas-t" data-reveal>Cartas</h2>
+      @for (l of letters; track l.name; let i = $index) {
+        <figure class="letter" [class.flip]="i % 2 === 1">
+          <img [src]="'media/' + l.img + '-sm.webp'" [alt]="'Foto de la sesión de ' + l.name" width="700" height="875" loading="lazy" data-reveal="photo" />
+          <div class="words">
+            <blockquote data-reveal [revealDelay]="90">{{ l.text }}</blockquote>
+            <figcaption data-reveal [revealDelay]="160"><b>{{ l.name }}</b> {{ l.session }}</figcaption>
+          </div>
+        </figure>
+      }
     </section>
   `,
   styles: `
-    .layout { display: grid; grid-template-columns: 0.4fr 1.6fr; gap: clamp(30px, 6vw, 100px); align-items: center; margin-top: clamp(50px, 7vw, 100px); min-height: 360px; }
-    .stamp { margin: 0; padding: 10px; background: var(--paper); box-shadow: 0 0 0 1px var(--line), 0 20px 30px -24px var(--ink); rotate: -3deg; animation: card 600ms var(--ease-out); }
-    .stamp img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
-    .letter { margin: 0; animation: card 700ms var(--ease-out); }
-    @keyframes card { from { opacity: 0; filter: blur(4px); translate: 0 10px; } }
-    .letter p { font-family: var(--font-display); font-style: italic; font-weight: 340; font-size: clamp(1.8rem, 3.4vw, 3.1rem); line-height: 1.15; }
-    .letter footer { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 28px; }
-    .who { font-weight: 600; }
-    .what { color: var(--muted); }
-    .what::before { content: '— '; color: var(--hilo); }
-    .nav { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 50px; padding-top: 18px; border-top: 1px solid var(--line); }
-    .count { font-family: var(--font-display); font-style: italic; font-size: 1.1rem; color: var(--ink-2); }
+    .letters { padding-block: var(--section); background: var(--surface); }
+    h2 { font-size: var(--step-display); margin-bottom: 96px; }
+    .letter { display: grid; grid-template-columns: 32vw 1fr; gap: 6vw; align-items: center; }
+    .letter + .letter { margin-top: 120px; }
+    .letter.flip { grid-template-columns: 1fr 32vw; }
+    .letter.flip img { order: 2; }
+    .letter.flip .words { justify-self: end; }
+    img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; filter: brightness(0.9) saturate(0.9); }
+    .words { max-width: 30ch; }
+    blockquote { font-size: var(--step-lead); font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; }
+    figcaption { margin-top: 20px; font-size: var(--step-small); color: var(--muted); }
+    figcaption b { display: block; color: var(--ink); font-size: var(--step-body); }
     @media (max-width: 760px) {
-      .layout { grid-template-columns: 1fr; }
-      .stamp { width: 46%; }
-      .count { display: none; }
+      h2 { font-size: 16vw; margin-bottom: 56px; }
+      .letter, .letter.flip { grid-template-columns: 1fr; gap: 20px; }
+      .letter + .letter { margin-top: 72px; }
+      img { width: 72%; }
+      .letter.flip img { order: 0; justify-self: end; }
+      .letter.flip .words { justify-self: end; text-align: right; }
     }
   `,
 })
 export class Letters {
   protected readonly letters = LETTERS;
-  protected readonly i = signal(0);
-
-  protected go(dir: number) {
-    this.i.update((v) => (v + dir + LETTERS.length) % LETTERS.length);
-  }
 }

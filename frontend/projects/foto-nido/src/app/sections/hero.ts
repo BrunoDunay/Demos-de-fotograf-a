@@ -1,136 +1,92 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, effect, inject, viewChild } from '@angular/core';
-import { Album } from '../core/booking';
-import { Motion, prefersReducedMotion, useGsap } from '../core/motion';
-import { Running } from '../shared/running';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, inject, signal, viewChild } from '@angular/core';
+import { GROWING } from '../core/content';
+import { useGsap } from '../core/motion';
 
 /**
- * Portada: una copia chica al centro, entre "Lo pequeño" y "dura poco.". Al bajar, la sección
- * se queda fija y la copia crece hasta llenar la pantalla (un clip-path que se abre), mientras
- * las palabras se apartan. Es la misma copia con la que termina la intro de revelado.
+ * Portada: "Lo pequeño dura poco" se queda fijo como el título grabado en la tapa de un álbum,
+ * y abajo, en el mismo marco, el bebé crece: de la semana 31 al primer cumpleaños.
+ * El cambio de foto lo marca el scroll (position: sticky, sin secuestrar la rueda).
  */
 @Component({
   selector: 'app-hero',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Running],
   template: `
-    <section class="hero" id="inicio" #root running="">
+    <section class="hero" id="inicio" #hero>
       <div class="stage">
-        <div class="frame" #frame>
-          <img src="media/nb-manta.webp" srcset="media/nb-manta-sm.webp 720w, media/nb-manta.webp 1400w" sizes="100vw"
-            alt="Recién nacido dormido, envuelto en una manta café" width="1400" height="2097" fetchpriority="high" />
-          <div class="veil"></div>
+        <h1 class="title">Lo pequeño <br class="br" />dura poco</h1>
+        <div class="frame">
+          @for (p of photos; track p.img; let i = $index) {
+            <img
+              [src]="'media/' + p.img + '.webp'"
+              [attr.srcset]="'media/' + p.img + '-sm.webp 700w, media/' + p.img + '.webp 1400w'"
+              sizes="(max-width: 760px) 92vw, 38vw"
+              [alt]="p.alt"
+              width="1000"
+              height="1500"
+              [class.on]="active() === i"
+              [attr.loading]="i < 2 ? 'eager' : 'lazy'"
+              [attr.fetchpriority]="i === 0 ? 'high' : null"
+            />
+          }
         </div>
-        <p class="top a-fade">Fotografía de recién nacidos y familia · Aguascalientes</p>
-        <h1 class="words">
-          <span class="w w1"><span class="in">Lo pequeño</span></span>
-          <span class="w w2"><span class="in"><em>dura poco.</em></span></span>
-        </h1>
-        <p class="caption cap a-fade">Lía, 9 días. Estudio Nido.</p>
-        <div class="over">
-          <p>Fotografío los primeros días, la espera y a los de casa. Sin prisa, en un estudio tibio, con alguien que sabe cargar a un bebé.</p>
-          <button type="button" class="thread light" (click)="album.indexOpen.set(true)">Abrir el índice <span class="arrow">→</span></button>
-        </div>
-        <span class="hint a-fade" aria-hidden="true">Baja para ampliar</span>
+        <p class="age" aria-live="polite"><b>{{ photos[active()].age }}</b> {{ photos[active()].who }}</p>
+        <p class="lede">Fotografía de recién nacidos, maternidad y familia en Aguascalientes. Con luz de ventana y sin prisa.</p>
+        <a class="btn act" href="#reserva">Aparta tu fecha</a>
       </div>
     </section>
   `,
   styles: `
-    .hero { position: relative; height: 100svh; }
-    .stage { position: relative; height: 100svh; overflow: hidden; }
-    .frame { position: absolute; inset: 0; clip-path: inset(calc(50% - var(--print-h) / 2) calc(50% - var(--print-w) / 2)); will-change: clip-path; }
-    .frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
-    .veil { position: absolute; inset: 0; background: linear-gradient(0deg, oklch(18% 0.02 45 / 70%), transparent 55%); opacity: 0; }
-    .top { position: absolute; left: 0; right: 0; top: 104px; text-align: center; font-size: 0.74rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
-    .words { position: absolute; inset: 0; pointer-events: none; font-size: clamp(3rem, 7.2vw, 7.6rem); font-weight: 300; line-height: 1; }
-    .w { position: absolute; top: 50%; overflow: hidden; padding: 0.06em 0.08em 0.14em; translate: 0 -50%; white-space: nowrap; }
-    .w .in { display: inline-block; }
-    .w1 { right: calc(50% + var(--print-w) / 2 + 2.4vw); }
-    .w2 { left: calc(50% + var(--print-w) / 2 + 2.4vw); }
-    .w2 em { color: var(--hilo); font-weight: 340; }
-    .cap { position: absolute; left: 0; right: 0; top: calc(50% + var(--print-h) / 2 + 14px); text-align: center; }
-    .over { position: absolute; left: var(--gutter); bottom: clamp(34px, 7vh, 70px); max-width: 520px; color: var(--paper); opacity: 0; }
-    .over p { font-family: var(--font-display); font-size: clamp(1.5rem, 2.4vw, 2.2rem); line-height: 1.2; font-weight: 340; }
-    .thread.light { margin-top: 18px; color: var(--paper); }
-    .hint { position: absolute; left: 0; right: 0; bottom: 28px; text-align: center; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+    /* Tres pantallas de recorrido para seis fotos */
+    .hero { position: relative; height: 260svh; }
+    .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+    .title {
+      position: absolute; z-index: 2; left: 0; right: 0; top: 96px; text-align: center;
+      font-size: 7.4vw; line-height: 0.86; letter-spacing: -0.05em; pointer-events: none;
+    }
+    .title .br { display: none; }
+    .frame { position: absolute; z-index: 1; left: 50%; bottom: 0; height: calc(100svh - 96px - 7.4vw - 28px); aspect-ratio: 2 / 3; translate: -50% 0; background: var(--surface); overflow: hidden; }
+    .frame img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      /* Fotos un poco más oscuras y cálidas para que el dorado no pelee con ellas */
+      filter: brightness(0.86) saturate(0.92);
+      opacity: 0; scale: 1.06;
+      transition: opacity 700ms ease, scale 2600ms var(--ease-out);
+    }
+    .frame img.on { opacity: 1; scale: 1; }
+    .age { position: absolute; z-index: 2; right: var(--margin); bottom: 112px; width: min(26ch, 24vw); font-size: var(--step-small); text-align: right; }
+    .age b { display: block; font-size: var(--step-lead); font-weight: 800; letter-spacing: -0.03em; }
+    .lede { position: absolute; z-index: 2; left: var(--margin); bottom: 32px; max-width: 26ch; font-weight: 600; }
+    .act { position: absolute; z-index: 2; right: var(--margin); bottom: 32px; }
+
     @media (max-width: 760px) {
-      .w { translate: none; left: 0; right: 0; text-align: center; }
-      .w1 { top: auto; bottom: calc(50% + var(--print-h) / 2 + 8px); }
-      .w2 { top: calc(50% + var(--print-h) / 2 + 44px); }
-      .words { font-size: clamp(2.6rem, 12vw, 3.6rem); }
-      .top { top: 92px; padding: 0 var(--gutter); }
+      .hero { height: 260svh; }
+      .title { top: 76px; font-size: 15vw; }
+      .title .br { display: inline; }
+      .frame { left: var(--margin); right: var(--margin); bottom: auto; top: calc(76px + 27vw); height: auto; max-height: calc(100svh - 76px - 27vw - 150px); margin-inline: auto; translate: none; }
+      .age { right: auto; left: var(--margin); bottom: 128px; width: auto; text-align: left; }
+      .age b { display: inline; margin-right: 8px; font-size: var(--step-body); }
+      .lede { bottom: 82px; max-width: none; right: var(--margin); font-size: var(--step-small); }
+      .act { left: var(--margin); right: var(--margin); bottom: 16px; }
     }
   `,
 })
 export class Hero {
-  protected readonly album = inject(Album);
-  private readonly motion = inject(Motion);
-  private readonly root = viewChild.required<ElementRef<HTMLElement>>('root');
-  private readonly frame = viewChild.required<ElementRef<HTMLElement>>('frame');
-  private ready = false;
-  private played = false;
+  protected readonly photos = GROWING;
+  protected readonly active = signal(0);
+  private readonly hero = viewChild.required<ElementRef<HTMLElement>>('hero');
 
   constructor() {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      const root = this.root().nativeElement;
-      const frame = this.frame().nativeElement;
-      const { gsap, ScrollTrigger } = useGsap();
-      if (prefersReducedMotion()) return;
-      const q = gsap.utils.selector(root);
-      gsap.set(q('.w .in'), { yPercent: 110 });
-      gsap.set(q('.a-fade'), { opacity: 0 });
-
-      // Recorte de la copia en px (mismo cálculo que el CSS) para poder animarlo.
-      const printClip = () => {
-        const { w, h } = frameSize();
-        const x = (frame.clientWidth - w) / 2;
-        const y = (frame.clientHeight - h) / 2;
-        return `inset(${y}px ${x}px ${y}px ${x}px)`;
-      };
-      // Lee el tamaño real de la copia midiendo un elemento temporal con las variables CSS.
-      const probe = document.createElement('div');
-      probe.style.cssText = 'position:absolute;visibility:hidden;width:var(--print-w);height:var(--print-h)';
-      root.appendChild(probe);
-      const frameSize = () => ({ w: probe.offsetWidth, h: probe.offsetHeight });
-
-      const ctx = gsap.context(() => {
-        const mobile = matchMedia('(max-width: 760px)').matches;
-        gsap
-          .timeline({
-            scrollTrigger: { trigger: root, start: 'top top', end: '+=140%', pin: true, scrub: 0.6, invalidateOnRefresh: true },
-            defaults: { ease: 'none' },
-          })
-          .fromTo(frame, { clipPath: () => printClip() }, { clipPath: 'inset(0px 0px 0px 0px)', duration: 1 }, 0)
-          .fromTo(q('.frame img'), { scale: 1.08 }, { scale: 1, duration: 1 }, 0)
-          .to(q('.w1'), { xPercent: mobile ? 0 : -40, yPercent: mobile ? -60 : 0, opacity: 0, duration: 0.55 }, 0)
-          .to(q('.w2'), { xPercent: mobile ? 0 : 40, yPercent: mobile ? 60 : 0, opacity: 0, duration: 0.55 }, 0)
-          .to(q('.cap, .top, .hint'), { opacity: 0, duration: 0.25 }, 0)
-          .to(q('.veil'), { opacity: 1, duration: 0.4 }, 0.6)
-          .fromTo(q('.over'), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35 }, 0.65);
-      }, root);
-      destroyRef.onDestroy(() => {
-        ctx.revert();
-        probe.remove();
+      const { ScrollTrigger } = useGsap();
+      const n = this.photos.length;
+      const st = ScrollTrigger.create({
+        trigger: this.hero().nativeElement,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => this.active.set(Math.min(n - 1, Math.floor(self.progress * n))),
       });
-      this.ready = true;
-      if (this.motion.introDone()) this.play();
-      void ScrollTrigger;
+      destroyRef.onDestroy(() => st.kill());
     });
-
-    effect(() => {
-      if (this.motion.introDone() && this.ready) this.play();
-    });
-  }
-
-  /** Entrada después de la intro: las palabras suben desde su máscara. */
-  private play() {
-    if (this.played) return;
-    this.played = true;
-    const { gsap } = useGsap();
-    const q = gsap.utils.selector(this.root().nativeElement);
-    gsap
-      .timeline({ defaults: { ease: 'expo.out' } })
-      .to(q('.w .in'), { yPercent: 0, duration: 1.3, stagger: 0.12 }, 0.1)
-      .to(q('.a-fade'), { opacity: 1, duration: 0.9, stagger: 0.08 }, 0.5);
   }
 }
