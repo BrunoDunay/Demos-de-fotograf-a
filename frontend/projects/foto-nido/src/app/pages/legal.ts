@@ -44,32 +44,36 @@ const DOCS: Record<string, LegalDoc> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink],
   template: `
-    <article class="legal wrap">
-      <a routerLink="/" class="link back">Volver al inicio</a>
-      <h1>{{ doc().title }}</h1>
-      <p class="updated">Actualizado: {{ doc().updated }}</p>
-      <p class="intro">{{ doc().intro }}</p>
-      @for (s of doc().sections; track s.h) {
-        <section>
-          <h2>{{ s.h }}</h2>
-          @for (p of s.p; track p) {
-            <p>{{ p }}</p>
-          }
-        </section>
-      }
-      <p class="note">Documento de ejemplo para un sitio demo con marca ficticia. En un proyecto real lo revisa un abogado.</p>
+    <article class="legal">
+      <div class="page narrow">
+        <a routerLink="/" class="back">← Volver al inicio</a>
+        <p class="folio"><span><b>Legal</b> · actualizado {{ doc().updated }}</span><span>Nido</span></p>
+        <h1>{{ doc().title }}</h1>
+        <p class="intro">{{ doc().intro }}</p>
+        @for (s of doc().sections; track s.h; let i = $index) {
+          <section>
+            <h2><span>0{{ i + 1 }}</span>{{ s.h }}</h2>
+            @for (p of s.p; track p) {
+              <p>{{ p }}</p>
+            }
+          </section>
+        }
+        <p class="note">Documento de ejemplo para un sitio demo con marca ficticia. En un proyecto real lo revisa un abogado.</p>
+      </div>
     </article>
   `,
   styles: `
-    .legal { max-width: 860px; padding-block: 140px 120px; }
-    .back { display: inline-block; margin-bottom: 40px; font-size: var(--step-small); }
-    h1 { font-size: var(--step-head); }
-    .updated { margin-top: 14px; font-size: var(--step-small); color: var(--muted); }
-    .intro { margin-top: 32px; font-size: var(--step-lead); font-weight: 600; line-height: 1.3; letter-spacing: -0.02em; }
-    section { margin-top: 56px; }
-    h2 { font-size: var(--step-lead); letter-spacing: -0.03em; margin-bottom: 12px; }
-    section p + p { margin-top: 12px; }
-    .note { margin-top: 72px; padding: 20px 22px; background: var(--surface); font-size: var(--step-small); }
+    .legal { padding: 160px 0 110px; }
+    .narrow { max-width: 820px; }
+    .back { display: block; width: fit-content; margin-bottom: 30px; font-size: 0.85rem; font-weight: 600; color: var(--muted); transition: color 200ms ease, transform 400ms var(--ease-out); }
+    @media (hover: hover) and (pointer: fine) { .back:hover { color: var(--hilo); transform: translateX(-4px); } }
+    h1 { margin-top: 30px; font-size: clamp(3rem, 8vw, 6rem); }
+    .intro { margin-top: 26px; font-size: 1.15rem; color: var(--ink-2); }
+    section { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); }
+    h2 { display: flex; gap: 14px; align-items: baseline; font-size: 2rem; }
+    h2 span { font-family: var(--font-body); font-size: 0.8rem; font-weight: 600; color: var(--hilo); }
+    section p { margin-top: 12px; color: var(--ink-2); }
+    .note { margin-top: 60px; padding: 16px 18px; border: 1px dashed var(--line-2); font-size: 0.88rem; color: var(--muted); }
   `,
 })
 export default class Legal {

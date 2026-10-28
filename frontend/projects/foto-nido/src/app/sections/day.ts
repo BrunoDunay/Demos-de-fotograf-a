@@ -1,49 +1,82 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { VERBS } from '../core/content';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, inject, viewChild } from '@angular/core';
+import { DAY } from '../core/content';
+import { prefersReducedMotion, useGsap } from '../core/motion';
 import { Reveal } from '../shared/reveal';
+import { Running } from '../shared/running';
 
-/**
- * Un día de sesión, contado con un verbo por etapa. Cada verbo se queda al centro de la pantalla
- * mientras su foto pasa detrás, y lo empuja el verbo siguiente.
- */
+/** Un día de sesión newborn contado por horas. Un hilo rojo se va cosiendo con el scroll. */
 @Component({
   selector: 'app-day',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Reveal],
+  imports: [Reveal, Running],
   template: `
-    <section id="dia" aria-labelledby="dia-t">
-      <h2 class="visually-hidden" id="dia-t">Un día de sesión</h2>
-      <ol class="days">
-        @for (v of verbs; track v.verb) {
-          <li class="panel">
-            <img [src]="'media/' + v.img + '.webp'" [alt]="v.alt" width="1400" height="933" loading="lazy" />
-            <div class="pin"><p class="verb" aria-hidden="true">{{ v.verb }}</p></div>
-            <p class="say" data-reveal><b>{{ v.time }}</b> {{ v.text }}</p>
-          </li>
-        }
-      </ol>
+    <section class="section day" id="dia" running="Un día de sesión" #root>
+      <div class="page">
+        <p class="folio" data-reveal><span><b>Un día de sesión</b> · newborn</span><span>p. 44</span></p>
+        <div class="layout">
+          <div class="intro">
+            <h2 data-reveal>De las 9:30 <em>a la galería</em>.</h2>
+            <p data-reveal [revealDelay]="80">Así se ve una sesión newborn de verdad, con sus pausas. Las de maternidad y familia son más cortas y casi siempre al atardecer.</p>
+            <figure class="still" data-reveal="photo" [revealDelay]="140">
+              <img src="media/nb-luz-sm.webp" alt="Mamá cargando a su bebé recién nacido junto a la ventana" width="720" height="1080" loading="lazy" />
+            </figure>
+          </div>
+          <ol class="hours">
+            <span class="seam" aria-hidden="true"></span>
+            @for (h of day; track h.time; let i = $index) {
+              <li data-reveal [revealDelay]="i * 40">
+                <span class="time">{{ h.time }}</span>
+                <div>
+                  <h3>{{ h.title }}</h3>
+                  <p>{{ h.text }}</p>
+                </div>
+              </li>
+            }
+          </ol>
+        </div>
+      </div>
     </section>
   `,
   styles: `
-    .days { list-style: none; padding: 0; }
-    .panel { position: relative; height: 100svh; overflow: clip; background: var(--surface); }
-    /* Fotos más oscuras para que el verbo dorado se lea sobre cualquiera */
-    img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.58) saturate(0.9); }
-    .pin { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; }
-    .verb {
-      position: sticky; top: calc(50% - 0.45em); bottom: calc(50% - 0.45em); text-align: center;
-      font-size: var(--step-display); font-weight: 800; line-height: 0.9; letter-spacing: -0.05em;
-    }
-    .say { position: absolute; left: var(--margin); bottom: var(--margin); max-width: 380px; padding: 18px 20px; background: var(--scrim); }
-    .say b { display: block; font-size: var(--step-lead); letter-spacing: -0.03em; }
-    @media (max-width: 760px) {
-      .verb { font-size: 22vw; }
-      /* El verbo se detiene antes de llegar al texto de abajo */
-      .pin { bottom: 170px; }
-      .say { right: var(--margin); max-width: none; font-size: var(--step-small); }
+    .layout { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(40px, 7vw, 120px); margin-top: clamp(40px, 6vw, 80px); align-items: start; }
+    .intro { position: sticky; top: 110px; }
+    h2 { font-size: clamp(2.6rem, 5vw, 4.6rem); }
+    h2 em { color: var(--hilo); }
+    .intro p { margin-top: 20px; max-width: 40ch; font-size: 1.08rem; color: var(--ink-2); }
+    .still { margin: 34px 0 0; width: 58%; aspect-ratio: 2 / 3; overflow: hidden; }
+    .still img { width: 100%; height: 100%; object-fit: cover; }
+    .hours { position: relative; list-style: none; margin: 0; padding: 0 0 0 34px; }
+    .seam { position: absolute; left: 0; top: 10px; bottom: 10px; width: 2px; background: repeating-linear-gradient(180deg, var(--hilo) 0 9px, transparent 9px 15px); }
+    li { position: relative; display: grid; grid-template-columns: 130px 1fr; gap: 20px; padding: 26px 0; border-bottom: 1px solid var(--line); }
+    li::before { content: ''; position: absolute; left: -38px; top: 38px; width: 9px; height: 9px; border-radius: 50%; background: var(--paper); box-shadow: inset 0 0 0 2px var(--hilo); }
+    .time { font-family: var(--font-display); font-size: 2rem; line-height: 1; font-variant-numeric: lining-nums; }
+    h3 { font-family: var(--font-body); font-weight: 600; font-size: 1.05rem; letter-spacing: 0; line-height: 1.3; }
+    li p { margin-top: 6px; color: var(--ink-2); }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .intro { position: static; }
+      .still { display: none; }
+      li { grid-template-columns: 1fr; gap: 6px; }
     }
   `,
 })
 export class Day {
-  protected readonly verbs = VERBS;
+  protected readonly day = DAY;
+  private readonly root = viewChild.required<ElementRef<HTMLElement>>('root');
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    // El hilo de la línea de tiempo se "cose" conforme bajas.
+    afterNextRender(() => {
+      if (prefersReducedMotion()) return;
+      const { gsap } = useGsap();
+      const root = this.root().nativeElement;
+      const seam = root.querySelector<HTMLElement>('.seam')!;
+      const tween = gsap.fromTo(seam, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'none', scrollTrigger: { trigger: root.querySelector('.hours'), start: 'top 70%', end: 'bottom 60%', scrub: true } });
+      destroyRef.onDestroy(() => {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      });
+    });
+  }
 }
